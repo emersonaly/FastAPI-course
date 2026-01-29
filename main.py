@@ -2,7 +2,7 @@ import zoneinfo
 from datetime import datetime
 
 from fastapi import FastAPI, HTTPException, status
-from models import Customer, CustomerCreate, Transaction, Invoice
+from models import Customer, CustomerCreate, CustomerUpdate, Transaction, Invoice
 from db import SessionDep, create_all_tables
 from sqlmodel import select
 
@@ -49,6 +49,19 @@ async def read_customer(customer_id: int, session: SessionDep):
         )
     return customer_db
 
+@app.patch("/customers/{customer_id}", response_model=Customer, status_code=status.HTTP_201_CREATED)
+async def update_customer(customer_id: int, customer_data: CustomerUpdate, session: SessionDep):
+    customer_db = session.get(Customer, customer_id)
+    if not customer_db:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Customer doesn't exits"
+        )
+    customer_data_dic = customer_data.model_dump(exclude_unset=True)
+    customer_db.sqlmodel_update(customer_data_dic)
+    session.add(customer_db)
+    session.commit()
+    session.refresh(customer_db)
+    return customer_db
 
 @app.delete("/customers/{customer_id}")
 async def delete_customer(customer_id: int, session: SessionDep):
