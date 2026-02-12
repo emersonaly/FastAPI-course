@@ -6,8 +6,8 @@ from sqlmodel import SQLModel, Session
 from app.main import app    
 from app.db import get_session
 
-sqlite_name = "db.sqlite3"
-sqlite_url = f"sqlite:///{sqlite_name}"
+# sqlite_name = "db.sqlite3"
+sqlite_url = "sqlite://"
 
 engine = create_engine(
     sqlite_url, 

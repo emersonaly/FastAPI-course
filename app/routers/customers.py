@@ -8,7 +8,7 @@ router = APIRouter()
 # asi aplica para todos los endpoints router = APIRouter(tags = ['customers'])
 
 
-@router.post("/customers", response_model=Customer, tags=["customers"])
+@router.post("/customers", response_model=Customer, tags=["customers"], status_code=status.HTTP_201_CREATED)
 async def create_customer(customer_data: CustomerCreate, session: SessionDep):
     customer = Customer.model_validate(customer_data.model_dump())
     session.add(customer)
