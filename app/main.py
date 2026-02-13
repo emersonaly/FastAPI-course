@@ -1,10 +1,12 @@
 import zoneinfo
 from datetime import datetime
 import time
-from fastapi import FastAPI, Request
+from fastapi import FastAPI, Request, Depends, HTTPException, status
 from .db import SessionDep, create_all_tables
 from .routers import customers, transactions, invoices, plans
 from sqlmodel import select
+from typing import Annotated
+from fastapi.security import HTTPBasic, HTTPBasicCredentials
 
 app = FastAPI(lifespan=create_all_tables)
 
@@ -22,9 +24,16 @@ async def log_requests_time(request: Request, call_next):
     response.headers["X-Process-Time"] = str(process_time)
     return response
 
+security = HTTPBasic()
+
+
 @app.get("/")
-async def root():
-    return {"message": "Hola, Luis!"}
+async def root(credentials: Annotated[HTTPBasicCredentials, Depends(security)]):
+    print(credentials)
+    if credentials.username == "admin" and credentials.password == "admin":
+        return {"message": "Hola, Luis!"}
+    else:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid credentials")
 
 
 country_timezones = {
